@@ -36,7 +36,7 @@ public class ArtistActivity extends Activity {
             if (_artistID != null && _artistID.length() > 0)
             {
                 ArtistTracksTask task = new ArtistTracksTask(_resultAdapter);
-                task.execute(new String[]{_artistID});
+                task.execute(new String[]{_artistID, this.getResources().getConfiguration().locale.getCountry()});
             }
             String name = extras.getString(SearchResult.ARTIST_NAME);
             if (name != null && name.length() > 0)

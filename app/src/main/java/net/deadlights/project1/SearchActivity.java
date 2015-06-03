@@ -1,12 +1,14 @@
 package net.deadlights.project1;
 
 import android.app.Activity;
+import android.content.Intent;
 import android.os.Bundle;
 import android.view.KeyEvent;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.inputmethod.EditorInfo;
+import android.widget.AdapterView;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ListView;
@@ -20,6 +22,7 @@ import java.util.ListIterator;
 
 import kaaes.spotify.webapi.android.SpotifyApi;
 import kaaes.spotify.webapi.android.SpotifyService;
+import kaaes.spotify.webapi.android.models.Artist;
 
 
 public class SearchActivity extends Activity {
@@ -45,6 +48,18 @@ public class SearchActivity extends Activity {
        });
         _resultAdapter = new SearchAdapter(new ArrayList<SearchResult>(), this);
         _lvResults.setAdapter(_resultAdapter);
+        _lvResults.setOnItemClickListener(new AdapterView.OnItemClickListener()
+        {
+            @Override
+            public void onItemClick(AdapterView<?> parent, View view, int position, long id)
+            {
+                SearchResult result =  _resultAdapter.getItem(position);
+                Intent i = new Intent(SearchActivity.this, ArtistActivity.class);
+                i.putExtra(SearchResult.ARTIST_ID, result.getParsedArtistID());
+                i.putExtra(SearchResult.ARTIST_NAME, result.getArtistName());
+                startActivity(i);
+            }
+        });
     }
 
     private void doSearch()

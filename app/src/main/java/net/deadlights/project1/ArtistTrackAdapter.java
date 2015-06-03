@@ -15,13 +15,13 @@ import java.util.List;
 /**
  * Created by JGG on 5/31/15.
  */
-public class SearchAdapter extends ArrayAdapter<SearchResult> {
+public class ArtistTrackAdapter extends ArrayAdapter<ArtistTrack> {
 
-    private List<SearchResult> itemList;
+    private List<ArtistTrack> itemList;
     private Context context;
 
-    public SearchAdapter(List<SearchResult> itemList, Context context) {
-        super(context, R.layout.search_list_item, itemList);
+    public ArtistTrackAdapter(List<ArtistTrack> itemList, Context context) {
+        super(context, R.layout.artist_track_list_item, itemList);
         this.itemList = itemList;
         this.context = context;
     }
@@ -32,7 +32,7 @@ public class SearchAdapter extends ArrayAdapter<SearchResult> {
         return 0;
     }
 
-    public SearchResult getItem(int position) {
+    public ArtistTrack getItem(int position) {
         if (itemList != null)
             return itemList.get(position);
         return null;
@@ -51,11 +51,12 @@ public class SearchAdapter extends ArrayAdapter<SearchResult> {
         ViewHolderItem viewHolder;
         if (v == null) {
             LayoutInflater inflater = (LayoutInflater) context.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
-            v = inflater.inflate(R.layout.search_list_item, null);
+            v = inflater.inflate(R.layout.artist_track_list_item, null);
 
             // well set up the ViewHolder
             viewHolder = new ViewHolderItem();
-            viewHolder._txtResult = (TextView) v.findViewById(R.id.textResult);
+            viewHolder._txtAlbumTitle = (TextView) v.findViewById(R.id.textAlbumTitle);
+            viewHolder._txtTrackTitle = (TextView) v.findViewById(R.id.textTrackTitle);
             viewHolder._imageResult = (ImageView) v.findViewById(R.id.imageResult);
 
             // store the holder with the view.
@@ -67,8 +68,9 @@ public class SearchAdapter extends ArrayAdapter<SearchResult> {
             viewHolder = (ViewHolderItem) v.getTag();
         }
 
-        SearchResult result = itemList.get(position);
-        viewHolder._txtResult.setText(result.getArtistName());
+        ArtistTrack result = itemList.get(position);
+        viewHolder._txtAlbumTitle.setText(result.getAlbumName());
+        viewHolder._txtTrackTitle.setText(result.getTrackName());
         String imageUrl = result.getSmallest();
         if (imageUrl != null && imageUrl.length() > 0) {
             Picasso.with(context).load(result.getSmallest()).into(viewHolder._imageResult);
@@ -77,16 +79,17 @@ public class SearchAdapter extends ArrayAdapter<SearchResult> {
 
     }
 
-    public List<SearchResult> getItemList() {
+    public List<ArtistTrack> getItemList() {
         return itemList;
     }
 
-    public void setItemList(List<SearchResult> itemList) {
+    public void setItemList(List<ArtistTrack> itemList) {
         this.itemList = itemList;
     }
 
     static class ViewHolderItem {
-        TextView _txtResult;
+        TextView _txtAlbumTitle;
+        TextView _txtTrackTitle;
         ImageView _imageResult;
     }
 }

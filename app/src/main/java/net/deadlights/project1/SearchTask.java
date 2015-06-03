@@ -28,7 +28,7 @@ import kaaes.spotify.webapi.android.models.Artist;
 import kaaes.spotify.webapi.android.models.ArtistsPager;
 
 /**
- * Created by atropos on 5/31/15.
+ * Created by JGG on 5/31/15.
  */
 public class SearchTask extends AsyncTask<String, Void, List<SearchResult>>
 {

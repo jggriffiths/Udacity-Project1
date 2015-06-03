@@ -6,16 +6,19 @@ import org.json.JSONObject;
 
 import java.util.Dictionary;
 import java.util.List;
+import java.util.NoSuchElementException;
 import java.util.SortedMap;
 import java.util.TreeMap;
 
 import kaaes.spotify.webapi.android.models.Image;
 
 /**
- * Created by atropos on 5/31/15.
+ * Created by JGG on 5/31/15.
  */
-public class SearchResult {
-
+public class SearchResult
+{
+    public static final String ARTIST_ID = "ArtistID";
+    public static final String ARTIST_NAME = "ArtistName";
     private String _artistName;
     private String _spotifyID;
 
@@ -39,14 +42,26 @@ public class SearchResult {
         return _spotifyID;
     }
 
+    public String getParsedArtistID()
+    {
+        String[] parts = _spotifyID.split(":");
+        return parts[2];
+    }
+
     public String getLargest()
     {
         return _images.get(_images.lastKey());
     }
 
-    public String getSmallest()
-    {
-        return _images.get(_images.firstKey());
+    public String getSmallest() {
+        try
+        {
+            return _images.get(_images.firstKey());
+        }
+        catch (NoSuchElementException e)
+        {
+            return null;
+        }
     }
 
     public void addImages(List<Image> images)

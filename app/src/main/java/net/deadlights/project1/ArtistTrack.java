@@ -18,14 +18,18 @@ public class ArtistTrack {
     private String _trackName;
     private String _albumName;
     private String _url;
+    private String _spotifyID;
+    private long _duration;
 
     // Size to URL mapped values
     private TreeMap<Integer, String> _images;
 
-    public ArtistTrack(String trackName, String albumName, String url)
+    public ArtistTrack(String trackName, String albumName, String spotifyID, long duration, String url)
     {
         _trackName = trackName;
         _albumName = albumName;
+        _spotifyID = spotifyID;
+        _duration = duration;
         _images = new TreeMap<Integer, String>();
     }
 
@@ -47,6 +51,16 @@ public class ArtistTrack {
     public String getLargest()
     {
         return _images.get(_images.lastKey());
+    }
+
+    public String getSpotifyID()
+    {
+        return _spotifyID;
+    }
+
+    public long getDurationMS()
+    {
+        return _duration;
     }
 
     public String getSmallest() {

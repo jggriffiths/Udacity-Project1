@@ -59,7 +59,7 @@ public class ArtistTracksTask extends AsyncTask<String, Void, List<ArtistTrack>>
             for(int x = 0; x < tracks.tracks.size(); x++)
             {
                 Track t = tracks.tracks.get(x);
-                ArtistTrack r = new ArtistTrack(t.album.name, t.name, t.preview_url);
+                ArtistTrack r = new ArtistTrack(t.album.name, t.name, t.uri, t.duration_ms, t.preview_url);
                 r.addImages(t.album.images);
                 results.add(r);
             }

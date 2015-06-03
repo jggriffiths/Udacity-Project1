@@ -3,6 +3,9 @@ package net.deadlights.project1;
 import android.app.Activity;
 import android.content.Intent;
 import android.os.Bundle;
+import android.text.Editable;
+import android.text.TextWatcher;
+import android.util.Log;
 import android.view.KeyEvent;
 import android.view.Menu;
 import android.view.MenuItem;
@@ -13,6 +16,7 @@ import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ListView;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import java.util.ArrayList;
 import java.util.Collection;
@@ -25,12 +29,12 @@ import kaaes.spotify.webapi.android.SpotifyService;
 import kaaes.spotify.webapi.android.models.Artist;
 
 
-public class SearchActivity extends Activity {
+public class SearchActivity extends Activity implements TaskResponse {
 
     EditText _txtSearch;
     ListView _lvResults;
     SearchAdapter _resultAdapter;
-    Button _btnSearch;
+    Boolean _badSearch = false;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -39,13 +43,36 @@ public class SearchActivity extends Activity {
 
         _lvResults = (ListView) findViewById(R.id.lvSearchResults);
         _txtSearch = (EditText) findViewById(R.id.txtSearch);
-       _btnSearch = (Button)findViewById(R.id.btnSearch);
-       _btnSearch.setOnClickListener(new View.OnClickListener() {
-           @Override
-           public void onClick(View v) {
-               doSearch();
-           }
-       });
+        _txtSearch.addTextChangedListener(new TextWatcher()
+        {
+            @Override
+            public void beforeTextChanged(CharSequence s, int start, int count, int after)
+            {
+
+            }
+
+            @Override
+            public void onTextChanged(CharSequence s, int start, int before, int count)
+            {
+
+            }
+
+            @Override
+            public void afterTextChanged(Editable s)
+            {
+                if (s.length() > 3)
+                {
+                    doSearch();
+                    Log.d(this.getClass().getSimpleName(), "Searching...");
+                }
+                else if (_resultAdapter.getCount() > 0)
+                {
+                    _resultAdapter.setItemList(new ArrayList<SearchResult>());
+                    _resultAdapter.notifyDataSetChanged();
+                    _badSearch = false;
+                }
+            }
+        });
         _resultAdapter = new SearchAdapter(new ArrayList<SearchResult>(), this);
         _lvResults.setAdapter(_resultAdapter);
         _lvResults.setOnItemClickListener(new AdapterView.OnItemClickListener()
@@ -64,7 +91,7 @@ public class SearchActivity extends Activity {
 
     private void doSearch()
     {
-        SearchTask task = new SearchTask(_resultAdapter);
+        SearchTask task = new SearchTask(_resultAdapter, this);
         task.execute(new String[] {_txtSearch.getText().toString()});
     }
 
@@ -89,5 +116,19 @@ public class SearchActivity extends Activity {
         }
 
         return super.onOptionsItemSelected(item);
+    }
+
+    @Override
+    public void taskFinished()
+    {
+        if (_resultAdapter.getCount() == 0 && !_badSearch)
+        {
+            _badSearch = true;
+            Toast.makeText(this, getString(R.string.no_artists), Toast.LENGTH_SHORT).show();
+        }
+        else if (_resultAdapter.getCount() > 0)
+        {
+            _badSearch = false;
+        }
     }
 }

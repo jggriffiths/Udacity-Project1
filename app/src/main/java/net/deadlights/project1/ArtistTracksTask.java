@@ -1,6 +1,7 @@
 package net.deadlights.project1;
 
 import android.os.AsyncTask;
+import android.util.Log;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -48,22 +49,25 @@ public class ArtistTracksTask extends AsyncTask<String, Void, List<ArtistTrack>>
         {
             List<ArtistTrack> results = new ArrayList<ArtistTrack>();
 
-
-            SpotifyApi api = new SpotifyApi();
-            SpotifyService spotify = api.getService();
-            Map options = new HashMap<String, String>();
-            // FIXIT - get location from device
-            options.put("country", Locale.US.getCountry());
-
-            Tracks tracks = spotify.getArtistTopTrack(params[0], options);
-            for(int x = 0; x < tracks.tracks.size(); x++)
+            if (params.length == 2)
             {
-                Track t = tracks.tracks.get(x);
-                ArtistTrack r = new ArtistTrack(t.album.name, t.name, t.uri, t.duration_ms, t.preview_url);
-                r.addImages(t.album.images);
-                results.add(r);
-            }
+                SpotifyApi api = new SpotifyApi();
+                SpotifyService spotify = api.getService();
+                Map options = new HashMap<String, String>();
 
+                options.put("country", params[1]);
+
+                Tracks tracks = spotify.getArtistTopTrack(params[0], options);
+                for (int x = 0;
+                     x < tracks.tracks.size();
+                     x++)
+                {
+                    Track t = tracks.tracks.get(x);
+                    ArtistTrack r = new ArtistTrack(t.album.name, t.name, t.uri, t.duration_ms, t.preview_url);
+                    r.addImages(t.album.images);
+                    results.add(r);
+                }
+            }
             return results;
         }
 }

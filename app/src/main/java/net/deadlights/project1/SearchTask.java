@@ -3,6 +3,7 @@ package net.deadlights.project1;
 import android.app.ProgressDialog;
 import android.os.AsyncTask;
 import android.widget.Adapter;
+import android.widget.Toast;
 
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -33,12 +34,13 @@ import kaaes.spotify.webapi.android.models.ArtistsPager;
 public class SearchTask extends AsyncTask<String, Void, List<SearchResult>>
 {
         private final String SEARCH_URL = "https://api.spotify.com/v1/search?q={0}&type=artist";
-
         private SearchAdapter _adapter;
+        private TaskResponse _response;
+        public SearchTask(SearchAdapter adapter, TaskResponse response)
 
-        public SearchTask(SearchAdapter adapter)
         {
             _adapter = adapter;
+            _response = response;
         }
 
         @Override
@@ -46,6 +48,7 @@ public class SearchTask extends AsyncTask<String, Void, List<SearchResult>>
             super.onPostExecute(result);
             _adapter.setItemList(result);
             _adapter.notifyDataSetChanged();
+            _response.taskFinished();
         }
 
         @Override

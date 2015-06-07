@@ -32,6 +32,7 @@ public class ArtistTrack
         _albumName = albumName;
         _spotifyID = spotifyID;
         _duration = duration;
+        _url = url;
         _images = new TreeMap<Integer, String>();
     }
 
@@ -91,7 +92,7 @@ public class ArtistTrack
     }
 
 
-    public static ArtistTrack FromJsonString(String json)
+    public static ArtistTrack fromJsonString(String json)
     {
         try
         {

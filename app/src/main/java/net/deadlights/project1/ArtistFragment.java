@@ -28,7 +28,21 @@ public class ArtistFragment extends Fragment
     private ListView _lvTracks;
     private ArtistTrackAdapter _resultAdapter;
     private String _artistID;
+    private String _artistName;
     private OnTrackSelectedListener _trackSelected;
+
+    @Override
+    public void onSaveInstanceState(Bundle outState) {
+        super.onSaveInstanceState(outState);
+        outState.putString("ARTIST_ID", _artistID);
+        outState.putString("ARTIST_NAME", _artistName);
+        ArrayList<CharSequence> tracks = new ArrayList<CharSequence>(_resultAdapter.getCount());
+        for(int x = 0; x < _resultAdapter.getCount(); x++)
+        {
+            tracks.add(_resultAdapter.getItem(x).toJsonString());
+        }
+        outState.putCharSequenceArrayList("TRACKS", tracks);
+    }
 
     public void setOnTrackSelectedListener(OnTrackSelectedListener l)
     {
@@ -47,15 +61,41 @@ public class ArtistFragment extends Fragment
         if (extras != null)
         {
             _artistID = extras.getString(SearchResult.ARTIST_ID);
-            getArtistTracks();
-            String name = extras.getString(SearchResult.ARTIST_NAME);
-            if (name != null && name.length() > 0)
+            _artistName = extras.getString(SearchResult.ARTIST_NAME);
+
+        }
+        else if (savedInstanceState != null)
+        {
+            _artistID = savedInstanceState.getString("ARTIST_ID");
+            _artistName = savedInstanceState.getString("ARTIST_NAME");
+
+            ArrayList<CharSequence> tracks = savedInstanceState.getCharSequenceArrayList("TRACKS");
+            ArrayList<ArtistTrack> artistTracks = new ArrayList<>();
+            for(int x = 0; x < tracks.size(); x++)
             {
+                artistTracks.add(ArtistTrack.fromJsonString(tracks.get(x).toString()));
+            }
+            _resultAdapter.setItemList(artistTracks);
+            _resultAdapter.notifyDataSetChanged();
+        }
+
+        if (_artistID != null) {
+            if (_resultAdapter.getCount() == 0) {
+                getArtistTracks();
+            }
+            if (_artistName != null && _artistName.length() > 0) {
                 getActivity().getActionBar().setTitle(R.string.top_ten);
-                getActivity().getActionBar().setSubtitle(name);
+                getActivity().getActionBar().setSubtitle(_artistName);
             }
         }
         return v;
+    }
+
+    public void updateArtist(String artistID, String artistName)
+    {
+        _artistID = artistID;
+        getActivity().getActionBar().setSubtitle(artistName);
+        getArtistTracks();
     }
 
     private void getArtistTracks() {

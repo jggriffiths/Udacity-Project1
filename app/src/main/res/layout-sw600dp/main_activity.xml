@@ -1,0 +1,21 @@
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:orientation="horizontal"
+    android:layout_width="fill_parent"
+    android:layout_height="fill_parent">
+
+    <fragment android:name="net.deadlights.project1.SearchFragment"
+        android:id="@+id/fragSearch"
+        android:layout_weight="1"
+        android:layout_width="0dp"
+        android:layout_height="match_parent"
+        tools:layout="@layout/frag_search" />
+
+    <fragment android:name="net.deadlights.project1.ArtistFragment"
+        android:id="@+id/fragArtist"
+        android:layout_weight="2"
+        android:layout_width="0dp"
+        android:layout_height="match_parent"
+        tools:layout="@layout/frag_artist_tracks" />
+
+</LinearLayout>

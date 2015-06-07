@@ -6,6 +6,7 @@ import org.json.JSONObject;
 
 import java.util.Dictionary;
 import java.util.List;
+import java.util.Map;
 import java.util.NoSuchElementException;
 import java.util.SortedMap;
 import java.util.TreeMap;
@@ -73,31 +74,61 @@ public class SearchResult
         }
     }
 
-    public void addImageFromJson(JSONObject imageObject)
+    public void addImage(int size, String url)
     {
-        try
-        {
-            _images.put(imageObject.getInt("width"), imageObject.getString("url"));
-        }
-        catch (JSONException e)
-        { }
+        _images.put(size, url);
     }
 
-    public static SearchResult getResultFromJson(JSONObject json)
+
+    public static SearchResult fromJsonString(String json)
     {
-        SearchResult retVal = null;
         try
         {
-            retVal = new SearchResult(json.getString("name"), json.getString("uri"));
-            JSONArray images = json.getJSONArray("images");
+            JSONObject o = new JSONObject(json);
+            String artistName = o.getString("artistName");
+            String spotifyID = o.getString("spotifyID");
+
+            SearchResult retVal = new SearchResult(artistName, spotifyID);
+
+            JSONArray images = o.getJSONArray("images");
             for(int x = 0; x < images.length(); x++)
             {
-                retVal.addImageFromJson(images.getJSONObject(x));
+                JSONObject image = images.getJSONObject(x);
+                retVal.addImage(image.getInt("size"), image.getString("url"));
             }
+
+            return retVal;
+        }
+        catch(JSONException e)
+        {
+            return null;
+        }
+    }
+
+    public String toJsonString()
+    {
+        try
+        {
+            JSONObject retVal = new JSONObject();
+            retVal.put("artistName", _artistName);
+            retVal.put("spotifyID", _spotifyID);
+            JSONArray images = new JSONArray();
+            for (Map.Entry<Integer, String> entry : _images.entrySet())
+            {
+                Integer size = entry.getKey();
+                String url = entry.getValue();
+                JSONObject image = new JSONObject();
+                image.put("size", size);
+                image.put("url", url);
+                images.put(image);
+            }
+            retVal.put("images", images);
+            return retVal.toString();
         }
         catch (JSONException e)
-        {}
-        return retVal;
+        {
+            return "";
+        }
     }
 
 

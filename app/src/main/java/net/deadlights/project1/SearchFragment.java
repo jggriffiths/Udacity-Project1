@@ -35,6 +35,8 @@ public class SearchFragment extends Fragment
     Boolean _badSearch = false;
     android.os.Handler _handler = new android.os.Handler();
     OnArtistSelectedListener _artistSelectedCallback;
+    private String _lastSearchTerm = "";
+    private Boolean _ignoreTextChange = false;
 
 
     public void setOnArtistSelectedListener(OnArtistSelectedListener l)
@@ -42,6 +44,17 @@ public class SearchFragment extends Fragment
         _artistSelectedCallback = l;
     }
 
+    @Override
+    public void onSaveInstanceState(Bundle outState) {
+        super.onSaveInstanceState(outState);
+        ArrayList<CharSequence> artists = new ArrayList<CharSequence>(_resultAdapter.getCount());
+        for(int x = 0; x < _resultAdapter.getCount(); x++)
+        {
+            artists.add(_resultAdapter.getItem(x).toJsonString());
+        }
+        outState.putCharSequenceArrayList("ARTISTS", artists);
+        outState.putString("SEARCH_TERM", _txtSearch.getText().toString());
+    }
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState)
@@ -54,6 +67,38 @@ public class SearchFragment extends Fragment
 
         _lvResults = (ListView) v.findViewById(R.id.lvSearchResults);
         _txtSearch = (EditText) v.findViewById(R.id.txtSearch);
+        _resultAdapter = new SearchAdapter(new ArrayList<SearchResult>(), getActivity());
+        _lvResults.setAdapter(_resultAdapter);
+        _lvResults.setOnItemClickListener(new AdapterView.OnItemClickListener()
+        {
+            @Override
+            public void onItemClick(AdapterView<?> parent, View view, int position, long id)
+            {
+                SearchResult result = _resultAdapter.getItem(position);
+                if (_artistSelectedCallback != null)
+                {
+                    _artistSelectedCallback.onArtistSelected(result);
+                }
+            }
+        });
+
+
+
+        if (savedInstanceState != null)
+        {
+            ArrayList<CharSequence> artists = savedInstanceState.getCharSequenceArrayList("ARTISTS");
+            ArrayList<SearchResult> results = new ArrayList<>();
+            for(int x = 0; x < artists.size(); x++)
+            {
+                results.add(SearchResult.fromJsonString(artists.get(x).toString()));
+            }
+            _resultAdapter.setItemList(results);
+            _resultAdapter.notifyDataSetChanged();
+            _lastSearchTerm = savedInstanceState.getString("SEARCH_TERM");
+            _ignoreTextChange = true;
+            _txtSearch.setText(_lastSearchTerm);
+        }
+
         _txtSearch.addTextChangedListener(new TextWatcher()
         {
             @Override
@@ -72,7 +117,7 @@ public class SearchFragment extends Fragment
             public void afterTextChanged(Editable s)
             {
                 _handler.removeCallbacksAndMessages(null);
-                if (s.length() > 3)
+                if (s.length() > 2 && !_lastSearchTerm.equals(_txtSearch.getText().toString()))
                 {
                     _handler.postDelayed(new Runnable()
                     {
@@ -85,25 +130,18 @@ public class SearchFragment extends Fragment
                 }
                 else if (_resultAdapter.getCount() > 0)
                 {
-                    clearAdapter();
-                    _badSearch = false;
+                    if (!_ignoreTextChange) {
+                        clearAdapter();
+                        _badSearch = false;
+                    }
+                    else
+                    {
+                        _ignoreTextChange = false;
+                    }
                 }
             }
         });
-        _resultAdapter = new SearchAdapter(new ArrayList<SearchResult>(), getActivity());
-        _lvResults.setAdapter(_resultAdapter);
-        _lvResults.setOnItemClickListener(new AdapterView.OnItemClickListener()
-        {
-            @Override
-            public void onItemClick(AdapterView<?> parent, View view, int position, long id)
-            {
-                SearchResult result = _resultAdapter.getItem(position);
-                if (_artistSelectedCallback != null)
-                {
-                    _artistSelectedCallback.onArtistSelected(result);
-                }
-            }
-        });
+
         return v;
     }
 
@@ -117,6 +155,7 @@ public class SearchFragment extends Fragment
             @Override
             public void success(ArtistsPager artistsPager, Response response)
             {
+                _lastSearchTerm = _txtSearch.getText().toString();
                 Pager<Artist> artists = artistsPager.artists;
                 final ArrayList<SearchResult> results = new ArrayList<SearchResult>();
                 for (int x = 0;

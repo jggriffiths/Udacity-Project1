@@ -66,6 +66,11 @@ public class ArtistTrack
         return _duration;
     }
 
+    public int getDurationSec()
+    {
+        return (int)_duration / 1000;
+    }
+
     public String getSmallest() {
         try
         {

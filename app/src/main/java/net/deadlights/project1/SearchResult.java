@@ -18,8 +18,6 @@ import kaaes.spotify.webapi.android.models.Image;
  */
 public class SearchResult
 {
-    public static final String ARTIST_ID = "ArtistID";
-    public static final String ARTIST_NAME = "ArtistName";
     private String _artistName;
     private String _spotifyID;
 

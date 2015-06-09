@@ -6,6 +6,7 @@ import android.view.LayoutInflater;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.AdapterView;
 import android.widget.ListView;
 import android.widget.Toolbar;
 
@@ -27,21 +28,21 @@ public class ArtistFragment extends Fragment
 {
     private ListView _lvTracks;
     private ArtistTrackAdapter _resultAdapter;
-    private String _artistID;
-    private String _artistName;
+    private SearchResult _artist;
     private OnTrackSelectedListener _trackSelected;
+    public static final String ARTIST = "ARTIST";
+    public static final String TRACKS = "TRACKS";
 
     @Override
     public void onSaveInstanceState(Bundle outState) {
         super.onSaveInstanceState(outState);
-        outState.putString("ARTIST_ID", _artistID);
-        outState.putString("ARTIST_NAME", _artistName);
+        outState.putString(ARTIST, _artist.toJsonString());
         ArrayList<CharSequence> tracks = new ArrayList<CharSequence>(_resultAdapter.getCount());
         for(int x = 0; x < _resultAdapter.getCount(); x++)
         {
             tracks.add(_resultAdapter.getItem(x).toJsonString());
         }
-        outState.putCharSequenceArrayList("TRACKS", tracks);
+        outState.putCharSequenceArrayList(TRACKS, tracks);
     }
 
     public void setOnTrackSelectedListener(OnTrackSelectedListener l)
@@ -57,19 +58,26 @@ public class ArtistFragment extends Fragment
         _lvTracks = (ListView) v.findViewById(R.id.lvArtistTracks);
         _resultAdapter = new ArtistTrackAdapter(new ArrayList<ArtistTrack>(), getActivity());
         _lvTracks.setAdapter(_resultAdapter);
+        _lvTracks.setOnItemClickListener(new AdapterView.OnItemClickListener() {
+            @Override
+            public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
+                if (_trackSelected != null)
+                {
+                    _trackSelected.onTrackSelected(_resultAdapter.getItem(position));
+                }
+            }
+        });
         Bundle extras = getArguments();
         if (extras != null)
         {
-            _artistID = extras.getString(SearchResult.ARTIST_ID);
-            _artistName = extras.getString(SearchResult.ARTIST_NAME);
+            _artist = SearchResult.fromJsonString(extras.getString(ARTIST));
 
         }
         else if (savedInstanceState != null)
         {
-            _artistID = savedInstanceState.getString("ARTIST_ID");
-            _artistName = savedInstanceState.getString("ARTIST_NAME");
+            _artist = SearchResult.fromJsonString(savedInstanceState.getString(ARTIST));
 
-            ArrayList<CharSequence> tracks = savedInstanceState.getCharSequenceArrayList("TRACKS");
+            ArrayList<CharSequence> tracks = savedInstanceState.getCharSequenceArrayList(TRACKS);
             ArrayList<ArtistTrack> artistTracks = new ArrayList<>();
             for(int x = 0; x < tracks.size(); x++)
             {
@@ -79,34 +87,34 @@ public class ArtistFragment extends Fragment
             _resultAdapter.notifyDataSetChanged();
         }
 
-        if (_artistID != null) {
+        if (_artist != null) {
             if (_resultAdapter.getCount() == 0) {
                 getArtistTracks();
             }
-            if (_artistName != null && _artistName.length() > 0) {
+            if (_artist.getArtistName().length() > 0) {
                 getActivity().getActionBar().setTitle(R.string.top_ten);
-                getActivity().getActionBar().setSubtitle(_artistName);
+                getActivity().getActionBar().setSubtitle(_artist.getArtistName());
             }
         }
         return v;
     }
 
-    public void updateArtist(String artistID, String artistName)
+    public void updateArtist(SearchResult artist)
     {
-        _artistID = artistID;
-        getActivity().getActionBar().setSubtitle(artistName);
+        _artist = artist;
+        getActivity().getActionBar().setSubtitle(_artist.getArtistName());
         getArtistTracks();
     }
 
     private void getArtistTracks() {
-        if (_artistID != null && _artistID.length() > 0) {
+        if (_artist != null && _artist.getParsedArtistID().length() > 0) {
 
             SpotifyApi api = new SpotifyApi();
             SpotifyService spotify = api.getService();
             Map options = new HashMap<String, String>();
             options.put("country", this.getResources().getConfiguration().locale.getCountry());
             final List<ArtistTrack> results = new ArrayList<ArtistTrack>();
-            spotify.getArtistTopTrack(_artistID, options, new Callback<Tracks>() {
+            spotify.getArtistTopTrack(_artist.getParsedArtistID(), options, new Callback<Tracks>() {
                 @Override
                 public void success(Tracks tracks, Response response) {
 

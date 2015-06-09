@@ -19,7 +19,7 @@
         android:text="Not by Coldplay"/>
 
     <ImageView
-        android:id="@+id/ivThumbnail"
+        android:id="@+id/ivAlbumArt"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:minWidth="0dp"

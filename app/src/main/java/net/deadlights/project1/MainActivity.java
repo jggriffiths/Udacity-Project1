@@ -15,7 +15,10 @@ public class MainActivity extends Activity implements OnTrackSelectedListener, O
     FragmentManager _fragManager;
     SearchFragment _fragSearch;
     ArtistFragment _fragArtist;
+    PlayTrackFragment _fragPlay;
     Boolean _isPhoneLayout = false;
+    private SearchResult _currentSearchResult;
+    private ArtistTrack _currentArtistTrack;
     @Override
     protected void onCreate(Bundle savedInstanceState)
     {
@@ -47,13 +50,13 @@ public class MainActivity extends Activity implements OnTrackSelectedListener, O
     @Override
     public void onArtistSelected(SearchResult r)
     {
+        _currentSearchResult = r;
         if (_isPhoneLayout) {
             _fragArtist = new ArtistFragment();
             _fragArtist.setOnTrackSelectedListener(this);
 
             Bundle args = new Bundle();
-            args.putString(SearchResult.ARTIST_ID, r.getParsedArtistID());
-            args.putString(SearchResult.ARTIST_NAME, r.getArtistName());
+            args.putString(ArtistFragment.ARTIST, _currentSearchResult.toJsonString());
             _fragArtist.setArguments(args);
 
             FragmentTransaction transaction = _fragManager.beginTransaction();
@@ -63,13 +66,24 @@ public class MainActivity extends Activity implements OnTrackSelectedListener, O
         }
         else
         {
-            _fragArtist.updateArtist(r.getParsedArtistID(), r.getArtistName());
+            _fragArtist.updateArtist(r);
         }
     }
 
     @Override
     public void onTrackSelected(ArtistTrack t)
     {
+        _currentArtistTrack = t;
+        _fragPlay = new PlayTrackFragment();
+        Bundle args = new Bundle();
+        args.putString(PlayTrackFragment.TRACK, _currentArtistTrack.toJsonString());
+        args.putString(PlayTrackFragment.ARTIST, _currentSearchResult.toJsonString());
+        _fragPlay.setArguments(args);
+
+        FragmentTransaction transaction = _fragManager.beginTransaction();
+        transaction.replace(R.id.flFragmentContainer, _fragPlay);
+        transaction.addToBackStack(null);
+        transaction.commit();
 
     }
 }

@@ -82,8 +82,6 @@ public class SearchFragment extends Fragment
             }
         });
 
-
-
         if (savedInstanceState != null)
         {
             ArrayList<CharSequence> artists = savedInstanceState.getCharSequenceArrayList("ARTISTS");
@@ -126,7 +124,7 @@ public class SearchFragment extends Fragment
                         {
                             doSearch();
                         }
-                    }, 1000);
+                    }, 750);
                 }
                 else if (_resultAdapter.getCount() > 0)
                 {
